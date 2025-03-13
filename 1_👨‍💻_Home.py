@@ -25,7 +25,7 @@ st.markdown(
 pages = st.sidebar.selectbox("", [
     "👨‍💻 Home",
     "📄 Formação e Experiência",
-    "💻 Skillss",
+    "💻 Skills",
 ])
 
 if (pages == '👨‍💻 Home'):
