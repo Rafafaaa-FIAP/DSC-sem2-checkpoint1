@@ -1,17 +1,10 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from streamlit_extras.app_logo import add_logo
 
 if "data" not in st.session_state:
     df = pd.read_csv("desmatamento_prodes.csv")
-    #df = df.sort_values(by="referencia", ascending=True)
     st.session_state["data"] = df
-# if "data" not in st.session_state:
-#     df = pd.read_excel("Dados_InstagramCliente_AULA_3ESP.xlsx", index_col="Post ID")
-#     df = df.sort_values(by="Reach", ascending=False)
-#     st.session_state["data"] = df
-
 
 st.set_page_config(page_title="Dashboard de Desmatamento da Região Norte do Brasil", layout="wide")
 st.logo("logo.png")
@@ -21,20 +14,16 @@ st.markdown(
     "[![GitHub](https://img.shields.io/badge/GitHub-0D1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rafafaaa)"
 )
 
-# Criando as sub-abas (pages)
-pages = st.sidebar.selectbox("", [
-    "👨‍💻 Home",
-    "📄 Formação e Experiência",
-    "💻 Skills",
-])
+tab1, tab2, tab3 = st.tabs(
+    ["👨‍💻 Sobre Mim", "📄 Formação e Experiência", "💻 Skills"])
 
-if (pages == '👨‍💻 Home'):
+with tab1:
     st.title("Rafael Cristofali")
 
     st.markdown('- 📝 Estudo programação desde 2018.')
     st.markdown('- 👔 Trabalho na área desde 2021.')
     st.markdown('- 💻 Tenho conhecimento Full Stack, mas gosto mais do Front-end.')
-elif (pages == '📄 Formação e Experiência'):
+with tab2:
     st.title('Experiência Profissional')
     st.markdown("- Engenheiro de software em Solid Gestão Empresarial (jan/2021 - o momento)")
 
@@ -48,18 +37,10 @@ elif (pages == '📄 Formação e Experiência'):
     st.markdown("- FIAP - Gestão de Infraestrutura de TI (out/2023)")
     st.markdown("- Alura - Design System: projetando elementos (ago/2023)")
     st.markdown("- Google - Inovação e empreendedorismo com tecnologia Startup in School - Edição Online Google Brasil EAD categoria App Inventor (out/2019)")
-elif (pages == '💻 Skills'):
+with tab3:
     st.title('Tecnologias')
-    st.markdown('- HTML')
-    st.markdown('- CSS')
-    st.markdown('- JavaScript')
-    st.markdown('- React JS')
-    st.markdown('- SQL')
-    st.markdown('- C#')
-    st.markdown('- Git')
+    st.markdown('![Tecnologias](https://skillicons.dev/icons?i=js,typescript,html,css,javascript,react,styledcomponents,sass,py,cs,git,figma)')
 
 st.sidebar.markdown("Desenvolvido por [Rafael Cristofali](https://github.com/Rafafaaa)")
 
 # https://www.kaggle.com/datasets/fidelissauro/desmatamento-brasil
-
-# distribuições binomial e normal

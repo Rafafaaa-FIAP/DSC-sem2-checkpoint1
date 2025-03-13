@@ -6,43 +6,30 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy import stats
 
-
-
-
-
 st.set_page_config(page_title="Distribuições Probabilísticas", layout="wide")
 st.logo("logo.png")
 
 data = st.session_state["data"]
 
-# Criando as sub-abas (pages)
-pages = st.sidebar.selectbox("Escolha a Distribuição:", [
-    "Distribuição Binomial",
-    "Distribuição Normal",
-])
+tab1, tab2 = st.tabs(
+    ["Distribuição Binomial", "Distribuição Normal"])
 
-if (pages == 'Distribuição Binomial'):
+with tab1:
     df = data
 
-    # Função para análise binomial
     def binomial_analysis(df, threshold):
-        # Excluindo a coluna 'referencia' e 'area_total_desmatamento' para análise por estado
         states = df.drop(['referencia', 'area_total_desmatamento'], axis=1)
         
-        # Número de anos (experimentos)
         n = len(df)
         
-        # Calculando a média de desmatamento por estado para determinar probabilidade
         mean_deforestation = states.mean()
         
-        # Probabilidade de sucesso (desmatamento acima do threshold)
         p = (states > threshold).mean()
         
-        # Resultados da distribuição binomial
         binomial_results = {}
         for state in states.columns:
-            k = (states[state] > threshold).sum()  # Número de sucessos
-            binomial_prob = binom.pmf(k, n, p[state])  # Probabilidade binomial
+            k = (states[state] > threshold).sum()
+            binomial_prob = binom.pmf(k, n, p[state])
             binomial_results[state] = {
                 'successes': k,
                 'probability': binomial_prob,
@@ -51,22 +38,22 @@ if (pages == 'Distribuição Binomial'):
         
         return binomial_results, p
 
-    # Configuração do Streamlit
     st.title('Análise de Desmatamento na Amazônia com Distribuição Binomial')
 
-    # Sidebar para interação do usuário
-    st.sidebar.header('Parâmetros da Análise')
-    threshold = st.sidebar.slider('Limiar de Desmatamento (km²)', 
+    st.header('Parâmetros da Análise')
+    threshold = st.slider('Limiar de Desmatamento (km²)', 
                                 min_value=100, 
                                 max_value=10000, 
                                 value=1000,
                                 step=100)
 
-    # Executar análise
     results, probabilities = binomial_analysis(df, threshold)
 
-    # Explicação da análise
     st.header('Interpretação')
+    st.write("A análise de desmatamento na Amazônia utilizando a distribuição binomial é uma ferramenta crucial para entender padrões e probabilidades de eventos extremos de desmatamento em diferentes estados ao longo do tempo.")
+    st.write("Ao estabelecer um limiar (threshold) de área desmatada, essa abordagem permite identificar a frequência com que cada estado supera esse limite, oferecendo uma perspectiva estatística sobre a gravidade e a consistência do problema em cada região. Isso é particularmente importante para a conservação ambiental, pois ajuda a priorizar áreas que necessitam de intervenções mais urgentes, além de fornecer uma base quantitativa para o planejamento de políticas públicas e a alocação de recursos.")
+    st.write("Compreender as probabilidades associadas ao desmatamento excessivo também auxilia na avaliação de tendências históricas e na previsão de riscos futuros, contribuindo para estratégias de mitigação mais eficazes e informadas, essenciais para a preservação da biodiversidade e o combate às mudanças climáticas.")
+
     st.write(f"""
     Esta análise utiliza a distribuição binomial para modelar a probabilidade de desmatamento 
     acima de {threshold} km² em cada estado. 
@@ -75,10 +62,8 @@ if (pages == 'Distribuição Binomial'):
     - 'mean_deforestation': Média anual de desmatamento por estado.
     """)
 
-    # Exibir resultados
     st.header('Resultados da Análise')
 
-    # DataFrame com resultados
     results_df = pd.DataFrame(results).T
     st.write('Resumo por Estado:')
     st.dataframe(results_df.style.format({
@@ -86,7 +71,6 @@ if (pages == 'Distribuição Binomial'):
         'mean_deforestation': '{:.2f}'
     }))
 
-    # Visualização 1: Gráfico de barras dos sucessos
     fig1 = px.bar(results_df, 
                 x=results_df.index, 
                 y='successes',
@@ -97,7 +81,6 @@ if (pages == 'Distribuição Binomial'):
     fig1.update_layout(xaxis_tickangle=-45)
     st.plotly_chart(fig1)
 
-    # Visualização 2: Série temporal do desmatamento total
     fig2 = px.line(df, 
                 x='referencia', 
                 y='area_total_desmatamento',
@@ -105,7 +88,6 @@ if (pages == 'Distribuição Binomial'):
                 labels={'referencia': 'Ano', 'area_total_desmatamento': 'Área Desmatada (km²)'})
     st.plotly_chart(fig2)
 
-    # Visualização 3: Heatmap de desmatamento por estado e ano
     heatmap_data = df.drop('area_total_desmatamento', axis=1).set_index('referencia')
     fig3 = go.Figure(data=go.Heatmap(
         z=heatmap_data.values,
@@ -119,32 +101,30 @@ if (pages == 'Distribuição Binomial'):
         yaxis_title='Ano'
     )
     st.plotly_chart(fig3)
-elif (pages == 'Distribuição Normal'):
+with tab2:
     df = data
 
-    # Sidebar para seleção
-    st.sidebar.header("Filtros")
-    estado = st.sidebar.selectbox("Selecione o estado", 
+    st.header("Filtros")
+    estado = st.selectbox("Selecione o estado", 
                                 ['Todos'] + list(df.columns[1:-1]))
-    ano_inicio = st.sidebar.slider("Ano inicial", 1988, 2022, 1988)
-    ano_fim = st.sidebar.slider("Ano final", 1988, 2022, 2022)
+    ano_inicio = st.slider("Ano inicial", 1988, 2022, 1988)
+    ano_fim = st.slider("Ano final", 1988, 2022, 2022)
 
-    # Filtrando dados
     if estado == 'Todos':
         dados_filtrados = df['area_total_desmatamento'][(df['referencia'] >= ano_inicio) & (df['referencia'] <= ano_fim)]
     else:
         dados_filtrados = df[estado][(df['referencia'] >= ano_inicio) & (df['referencia'] <= ano_fim)]
 
-    # Estatísticas básicas
+    st.title('Análise de Desmatamento na Amazônia com Distribuição Normal')
+
     st.subheader("Estatísticas Básicas")
     st.write(f"Média: {dados_filtrados.mean():.2f} km²")
     st.write(f"Desvio Padrão: {dados_filtrados.std():.2f} km²")
     st.write(f"Mínimo: {dados_filtrados.min()} km²")
     st.write(f"Máximo: {dados_filtrados.max()} km²")
 
-    # Teste de normalidade (Shapiro-Wilk)
     stat, p_value = stats.shapiro(dados_filtrados)
-    st.subheader("Teste de Normalidade (Shapiro-Wilk)")
+    st.subheader("Teste de Normalidade")
     st.write(f"Estatística do teste: {stat:.4f}")
     st.write(f"Valor p: {p_value:.4f}")
     if p_value > 0.05:
@@ -152,12 +132,15 @@ elif (pages == 'Distribuição Normal'):
     else:
         st.write("Os dados não seguem uma distribuição normal (p ≤ 0.05)")
 
-    # Interpretação dos resultados
     st.subheader("Interpretação dos Resultados")
     mean = dados_filtrados.mean()
     std = dados_filtrados.std()
     min_val = dados_filtrados.min()
     max_val = dados_filtrados.max()
+
+    st.write("A análise de desmatamento na Amazônia utilizando a distribuição normal é fundamental para avaliar se os padrões de desmatamento em um estado ou na região como um todo seguem uma variação previsível e simétrica em torno de uma média, o que pode revelar a natureza dos processos subjacentes.")
+    st.write("Essa abordagem permite identificar se o desmatamento é influenciado por fatores consistentes, como atividades econômicas regulares, ou por eventos extremos e imprevisíveis, como mudanças abruptas em políticas ambientais ou desastres naturais.")
+    st.write("O teste de normalidade, aliado às visualizações como histogramas e Q-Q plots, oferece uma base estatística robusta para compreender a estabilidade e a variabilidade dos dados ao longo do tempo, enquanto as estatísticas descritivas (média, desvio padrão, mínimo e máximo) fornecem insights sobre a magnitude e a dispersão do problema. Essa análise é essencial para tomadores de decisão, pois ajuda a direcionar esforços de conservação, monitorar a eficácia de políticas ambientais e prever cenários futuros, contribuindo para a gestão sustentável da Amazônia e a mitigação de impactos climáticos e ecológicos.")
 
     interpretation = f"""
     Analisando os dados de desmatamento para {estado} entre {ano_inicio} e {ano_fim}:
@@ -179,10 +162,8 @@ elif (pages == 'Distribuição Normal'):
     """
     st.write(interpretation)
 
-    # Visualizações
     st.subheader("Visualizações")
 
-    # Histograma com curva normal
     hist_data = go.Histogram(
         x=dados_filtrados,
         histnorm='probability density',
@@ -207,7 +188,6 @@ elif (pages == 'Distribuição Normal'):
     )
     st.plotly_chart(fig1)
 
-    # Q-Q Plot
     qq = stats.probplot(dados_filtrados, dist="norm")
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(
@@ -230,7 +210,6 @@ elif (pages == 'Distribuição Normal'):
     )
     st.plotly_chart(fig2)
 
-    # Série temporal
     if estado == 'Todos':
         fig3 = px.line(df, x='referencia', y='area_total_desmatamento',
                     title="Desmatamento Total por Ano")
