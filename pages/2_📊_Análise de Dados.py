@@ -21,7 +21,7 @@ st.write("Os dados apresentam a área desmatada em km² desde 1988 até 2022 nos
 
 st.subheader("Tipos de variáveis:")
 
-dfTpVar = pd.DataFrame([['referencia', 'o ano de referencia', 'Qualitativa Ordinal'],
+dfTpVar = pd.DataFrame([['referencia', 'o ano de referencia', 'Quantitativa Discreta'],
                         ['area de desmatamento', 'todos os valores de cada estado', 'Quantitativa Contínua']],
                         columns=['Nome', 'Descrição', 'Tipo'])
 st.dataframe(dfTpVar)
@@ -64,6 +64,8 @@ fig_linha.update_layout(
     yaxis_title="Área Desmatada (km²)",
     template="plotly_white"
 )
+
+st.write("Quando todos os estados estão selecionados podemos identificar que houve 2 picos, um em 1995 e o outro em 2004, após esse ano houve uma queda, voltando a subir somente 2015 e voltou a diminuir somente em 2021 onde estava num nível parecido com o ano de 2008.")
 
 fig_dispersao = px.scatter(dados_filtrados, 
                          x='referencia', 
